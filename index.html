@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Stylish Page & Memo Swipe</title>
+    <title>iPhone 13 Pro Optimized App</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -16,89 +16,103 @@
             --sidebar-bg: #1a1a1a;
         }
 
+        /* ダブルタップズーム抑制 & Safe Area 考慮 */
         * { touch-action: manipulation; box-sizing: border-box; }
 
         html, body {
-            margin: 0; padding: 0; height: 100%; height: 100dvh; width: 100vw;
-            background-color: #000; color: var(--text-main); overflow: hidden; 
-            position: fixed; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; padding: 0;
+            height: 100%; height: 100dvh;
+            width: 100vw;
+            background-color: #000;
+            color: var(--text-main);
+            overflow: hidden; 
+            position: fixed;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
         }
 
         .phone-container {
-            width: 100%; height: 100%; height: 100dvh; max-width: 414px; margin: 0 auto;
-            background-color: var(--bg-dark); display: flex; flex-direction: column;
+            width: 100%; height: 100%; height: 100dvh;
+            max-width: 414px; margin: 0 auto;
+            background-color: var(--bg-dark);
+            display: flex; flex-direction: column;
             position: relative; overflow: hidden;
+            /* iPhoneのノッチと下部バーの余白を自動確保 */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* ヘッダー */
         .nav-bar {
-            height: 60px; display: flex; align-items: center; padding: 0 10px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0; z-index: 10;
+            height: 50px; display: flex; align-items: center; padding: 0 10px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            z-index: 10;
         }
+        .menu-btn { font-size: 24px; cursor: pointer; padding: 10px; color: var(--text-main); }
         .page-nav { flex: 1; display: flex; align-items: center; justify-content: center; }
-        .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 22px; padding: 10px; cursor: pointer; }
-        .page-title-input { width: 130px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
+        .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 24px; padding: 5px 15px; cursor: pointer; }
+        .page-title-input { width: 120px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 固定上部 */
+        /* 固定上部（画像 & パラメータ） */
         .fixed-header {
-            display: flex; height: 260px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            display: flex; height: 230px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease-in-out;
         }
-        .phone-container.typing-mode .fixed-header { height: 80px; opacity: 0.3; }
+        /* 入力モード：iPhoneのキーボード高さを考慮して大幅に縮小 */
+        .phone-container.typing-mode .fixed-header { height: 60px; opacity: 0.1; pointer-events: none; }
 
-        .image-area { width: 60%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); position: relative; }
+        .image-area { width: 62%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); position: relative; }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
-        .param-area { width: 40%; display: flex; flex-direction: column; justify-content: center; padding: 5px; background-color: var(--card-bg); align-items: center; }
+        .param-area { width: 38%; display: flex; flex-direction: column; justify-content: center; padding: 5px; background-color: var(--card-bg); align-items: center; }
 
-        .tag-row { display: flex; gap: 4px; width: 90%; margin-bottom: 15px; }
-        .tag-btn { flex: 1; height: 32px; border-radius: 10px; font-size: 11px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; line-height: 1; }
-        .tag-btn.active { background-color: var(--accent-color); color: #000; box-shadow: 0 0 12px var(--accent-color); }
+        .tag-row { display: flex; gap: 4px; width: 92%; margin-bottom: 12px; }
+        .tag-btn { flex: 1; height: 30px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .tag-btn.active { background-color: var(--accent-color); color: #000; box-shadow: 0 0 10px var(--accent-color); }
         .tag-btn.inactive { background-color: #2a2a2a; color: #666; }
 
-        /* パラメータボタンの復元 */
-        .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; width: 100%; }
-        .param-label { font-size: 11px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
-        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 24px; padding: 5px 12px; cursor: pointer; transition: 0.1s; }
-        .btn-ctrl:active { color: var(--accent-color); transform: scale(1.2); }
+        .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; width: 100%; }
+        .param-label { font-size: 10px; color: var(--text-sub); margin-bottom: 4px; font-weight: 600; }
+        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 24px; padding: 2px 10px; cursor: pointer; }
+        .btn-ctrl:active { color: var(--accent-color); transform: scale(1.1); }
         
-        .indicator-container { display: flex; gap: 4px; }
-        .bar { width: 6px; height: 24px; background-color: var(--bar-inactive); border-radius: 2px; transition: 0.2s; }
-        .bar.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
+        .indicator-container { display: flex; gap: 3px; }
+        .bar { width: 5px; height: 18px; background-color: var(--bar-inactive); border-radius: 1px; }
+        .bar.active { background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
 
-        /* メモスワイプ */
-        .memo-swipe-outer { flex: 1; background-color: var(--bg-dark); display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .memo-dots { height: 20px; display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 10px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; transition: 0.3s; }
-        .dot.active { background: var(--accent-color); transform: scale(1.3); }
+        /* メモスワイプエリア */
+        .memo-swipe-outer { flex: 1; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-dark); }
+        .memo-dots { height: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px; }
+        .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; transition: 0.3s; }
+        .dot.active { background: var(--accent-color); transform: scale(1.4); }
 
         .memo-swipe-container { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .memo-swipe-container::-webkit-scrollbar { display: none; }
 
-        .memo-card-wrapper { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; padding: 10px 20px 40px 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
-        .phone-container.typing-mode .memo-card-wrapper { transform: translateY(-40px); }
-
-        .memo-frame {
-            flex: 0 0 320px; /* 枠の大きさを厳格に固定 */
-            background-color: rgba(255,255,255,0.03);
-            border: 2px solid var(--border-color); border-radius: 15px;
-            display: flex; flex-direction: column; padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden; /* はみ出し禁止 */
-        }
-        .memo-card-header { font-size: 11px; color: var(--accent-color); margin-bottom: 10px; letter-spacing: 1px; }
+        .memo-card-wrapper { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; padding: 10px 15px 30px 15px; display: flex; flex-direction: column; }
         
+        /* メモカードの枠（画面サイズに合わせて伸縮） */
+        .memo-frame {
+            flex: 1; max-height: 380px; 
+            background-color: rgba(255,255,255,0.03);
+            border: 1.5px solid var(--border-color); border-radius: 16px;
+            display: flex; flex-direction: column; padding: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .memo-card-header { font-size: 10px; color: var(--accent-color); margin-bottom: 8px; letter-spacing: 2px; font-weight: bold; }
         .memo-textarea {
             width: 100%; height: 100%; background: transparent; border: none;
             color: #ddd; font-size: 16px; line-height: 1.6; resize: none; outline: none;
-            overflow: hidden; /* スクロール禁止 */
+            overflow: hidden; /* 縦スクロール禁止 */
         }
 
         /* サイドメニュー */
-        .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease; padding: 40px 20px; }
+        .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease; padding: 60px 20px 20px 20px; }
         .sidebar.open { left: 0; }
         .sidebar-item { padding: 12px 0; border-bottom: 1px solid #333; color: #fff; font-size: 15px; cursor: pointer; }
         .setting-input-group { margin-top: 15px; }
-        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; font-size: 16px; border-radius: 5px; margin-bottom: 10px; }
+        .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 4px; }
+        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 16px; border-radius: 8px; margin-bottom: 12px; }
+
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 90; }
         .overlay.show { display: block; }
         input[type="file"] { display: none; }
@@ -108,14 +122,14 @@
 
 <div class="phone-container" id="mainContainer">
     <div class="sidebar" id="sidebar">
-        <div style="font-weight: bold; color: var(--accent-color); margin-bottom: 20px;">MENU</div>
+        <div style="font-weight: bold; color: var(--accent-color); font-size: 18px; margin-bottom: 20px;">MENU</div>
         <div id="sidebar-page-list"></div>
         <div class="sidebar-item" onclick="addNewDataPage()" style="color: var(--accent-color);">＋ ページを追加</div>
         <div class="setting-input-group">
-            <label style="font-size:10px;">タグ名1</label><input type="text" id="set-tag-name1" oninput="updateSettings()">
-            <label style="font-size:10px;">タグ名2</label><input type="text" id="set-tag-name2" oninput="updateSettings()">
+            <label>タグ名1</label><input type="text" id="set-tag-name1" oninput="updateSettings()">
+            <label>タグ名2</label><input type="text" id="set-tag-name2" oninput="updateSettings()">
         </div>
-        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 30px; text-align: center; opacity: 0.5;">閉じる</div>
+        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 40px; text-align: center; opacity: 0.5; font-size: 12px;">閉じる</div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
@@ -126,7 +140,7 @@
             <input type="text" class="page-title-input" id="pageTitle" oninput="saveCurrentState()">
             <button class="nav-arrow" onclick="changeDataPage(1)">▶</button>
         </div>
-        <div style="width:40px;"></div>
+        <div style="width:44px;"></div>
     </div>
 
     <div class="fixed-header" id="fixedHeader">
@@ -153,10 +167,10 @@
 <script>
     let appData = {
         currentIndex: 0,
-        tagName1: "タグ1", tagName2: "タグ2",
+        tagName1: "TAG 1", tagName2: "TAG 2",
         paramNames: ["近さ", "固さ", "見た目"],
         pages: [{
-            title: "ページ①", img: null, p1: 1, p2: 1, p3: 1,
+            title: "PAGE 1", img: null, p1: 1, p2: 1, p3: 1,
             tagActive1: false, tagActive2: false,
             memos: [{ content: "", isNew: false }]
         }]
@@ -165,6 +179,7 @@
     const swipeContainer = document.getElementById('memoSwipeContainer');
     const mainContainer = document.getElementById('mainContainer');
 
+    // ページ切り替え
     function changeDataPage(dir) {
         let next = appData.currentIndex + dir;
         if (next < 0) next = appData.pages.length - 1;
@@ -176,7 +191,7 @@
 
     function addNewDataPage() {
         appData.pages.push({
-            title: `ページ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1,
+            title: `PAGE ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1,
             tagActive1: false, tagActive2: false,
             memos: [{ content: "", isNew: false }]
         });
@@ -184,6 +199,7 @@
         renderAll(); toggleMenu(); saveToStorage();
     }
 
+    // メモスワイプ監視
     swipeContainer.addEventListener('scroll', () => {
         const index = Math.round(swipeContainer.scrollLeft / swipeContainer.clientWidth);
         const p = appData.pages[appData.currentIndex];
@@ -220,7 +236,7 @@
                         onfocus="setTyping(true)" 
                         onblur="setTyping(false)" 
                         oninput="updateMemoContent(this, ${i})"
-                        placeholder="メモを書き込む...">${m.content}</textarea>
+                        placeholder="Type here...">${m.content}</textarea>
                 </div>
             `;
             swipeContainer.appendChild(wrapper);
@@ -241,7 +257,7 @@
     }
 
     function updateMemoContent(el, memoIdx) {
-        // 枠を超えた入力を防止
+        // 固定枠からはみ出る入力をブロック
         if (el.scrollHeight > el.clientHeight) {
             el.value = appData.pages[appData.currentIndex].memos[memoIdx].content;
             return;
@@ -313,9 +329,9 @@
         renderAll(); saveToStorage();
     }
 
-    function saveToStorage() { localStorage.setItem('myAppData_vSwipeLimit', JSON.stringify(appData)); }
+    function saveToStorage() { localStorage.setItem('myAppData_viPhone13', JSON.stringify(appData)); }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vSwipeLimit');
+        const saved = localStorage.getItem('myAppData_viPhone13');
         if (saved) { appData = JSON.parse(saved); }
         renderAll();
     }
