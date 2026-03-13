@@ -2,128 +2,186 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- ズームを徹底的に抑制する設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Stylish App - Fixed Version</title>
+    <title>Seductive UI Prototype</title>
+    <!-- エレガントなフォントの読み込み -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&family=Noto+Sans+JP:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #ff2d75;
-            --text-main: #ffffff;
-            --text-sub: #a0a0a0;
-            --border-color: #333;
-            --bar-inactive: #383838;
-            --sidebar-bg: #1a1a1a;
+            --bg-dark: #0a0408; /* わずかに紫を含んだ漆黒 */
+            --card-bg: rgba(28, 12, 20, 0.8); 
+            --accent-pink: #ff0055; /* 艶やかなピンク */
+            --accent-gold: #d4af37; /* 上品なゴールド */
+            --text-main: #f5f5f5;
+            --text-sub: #b08d9b; /* 紫がかったサブテキスト */
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(212, 175, 55, 0.2);
         }
 
-        /* ダブルタップズームの抑制 */
         * { touch-action: manipulation; box-sizing: border-box; }
 
-        body {
+        html, body {
             margin: 0; padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #000;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; color: var(--text-main); overflow: hidden;
-            -webkit-user-select: none; user-select: none;
+            height: 100%; height: 100dvh;
+            width: 100vw;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            position: fixed;
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
-        /* iOSでの入力時ズレ防止のため、コンテナのサイズを固定 */
+        /* 全体に薄いグラデーションを重ねる */
+        body::before {
+            content: "";
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle at 80% 20%, rgba(255, 0, 85, 0.1), transparent 40%);
+            pointer-events: none;
+        }
+
         .phone-container {
-            width: 100%; max-width: 414px; height: 100%;
-            background-color: var(--bg-dark);
+            width: 100%; height: 100%; height: 100dvh;
+            max-width: 414px; margin: 0 auto;
             display: flex; flex-direction: column;
             position: relative; overflow: hidden;
-        }
-        @media (min-width: 500px) {
-            .phone-container { height: 800px; border: 8px solid #000; border-radius: 40px; }
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* ヘッダー：16px以上に設定してズーム防止 */
+        /* ヘッダー：グラスモーフィズム */
         .nav-bar {
-            height: 60px; display: flex; align-items: center; padding: 0 15px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            height: 65px; display: flex; align-items: center; padding: 0 20px;
+            background: rgba(10, 4, 8, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+        .menu-btn { 
+            color: var(--accent-gold); font-size: 28px; cursor: pointer; 
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
         }
         .page-title-input {
-            flex: 1; background: transparent; border: none; color: var(--text-main);
-            text-align: center; font-size: 18px; font-weight: bold; outline: none;
-            -webkit-user-select: text; user-select: text;
+            flex: 1; background: transparent; border: none; 
+            color: var(--accent-gold); text-align: center;
+            font-family: 'Playfair Display', serif; font-size: 22px; 
+            font-style: italic; outline: none; letter-spacing: 1px;
         }
 
-        /* 固定上部（画像・パラメータ） */
+        /* 画像 & パラメータ */
         .fixed-header {
-            display: flex; height: 260px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
+            display: flex; height: 280px; flex-shrink: 0; 
+            background: linear-gradient(to bottom, transparent, #160811);
         }
         .image-area {
-            width: 65%; background-color: #1a1a1a; display: flex; justify-content: center;
-            align-items: center; border-right: 1px solid var(--border-color); cursor: pointer;
+            width: 62%; display: flex; justify-content: center; align-items: center;
+            position: relative; cursor: pointer; border-right: 1px solid var(--border);
+            overflow: hidden;
         }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
+        .image-area::after {
+            content: ""; position: absolute; width: 100%; height: 100%;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+        }
 
         .param-area {
-            width: 35%; display: flex; flex-direction: column; justify-content: space-around;
-            padding: 10px 0; background-color: var(--card-bg);
+            width: 38%; display: flex; flex-direction: column; justify-content: space-around;
+            padding: 15px 0; background-color: rgba(20, 8, 15, 0.5);
         }
         .param-group { display: flex; flex-direction: column; align-items: center; }
-        .param-label { font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
-        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 22px; padding: 5px 12px; cursor: pointer; }
+        .param-label { 
+            font-size: 11px; color: var(--text-sub); margin-bottom: 10px; 
+            font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .btn-ctrl { 
+            background: none; border: none; color: var(--accent-gold); 
+            font-size: 22px; padding: 5px 10px; cursor: pointer; opacity: 0.8;
+        }
+        .btn-ctrl:active { transform: scale(1.3); color: var(--accent-pink); }
         
-        .indicator-container { display: flex; gap: 4px; }
-        .bar { width: 6px; height: 24px; background-color: var(--bar-inactive); border-radius: 2px; }
-        .bar.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
-
-        /* メモ欄：16px以上に設定してズーム防止 */
-        .scroll-content { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-dark); }
-        .memo-textarea {
-            width: 100%; height: 300px; background-color: rgba(255,255,255,0.03);
-            border: 1px solid var(--border-color); border-radius: 10px; padding: 15px;
-            color: #ccc; font-size: 16px; line-height: 1.5; resize: none; outline: none;
-            -webkit-user-select: text; user-select: text; touch-action: auto;
+        .indicator-container { display: flex; gap: 5px; }
+        .bar { 
+            width: 5px; height: 26px; background-color: rgba(255, 255, 255, 0.05); 
+            border-radius: 10px; transition: 0.3s;
+        }
+        .bar.active { 
+            background: linear-gradient(to bottom, var(--accent-pink), #80002b);
+            box-shadow: 0 0 15px var(--accent-pink);
         }
 
-        /* サイドメニュー */
+        /* メモエリア */
+        .scroll-content { 
+            flex: 1; overflow-y: auto; padding: 25px; 
+            background: linear-gradient(to bottom, #160811, var(--bg-dark));
+        }
+        .memo-label { 
+            font-size: 10px; color: var(--accent-gold); 
+            margin-bottom: 15px; letter-spacing: 3px; font-weight: bold;
+        }
+        .memo-textarea {
+            width: 100%; height: 280px; background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border); border-radius: 15px; padding: 20px;
+            color: #ddd; font-size: 16px; line-height: 1.8; outline: none;
+            backdrop-filter: blur(5px);
+        }
+
+        /* サイドメニュー：魅惑的な透過 */
         .sidebar {
-            position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%;
-            background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.8); padding: 40px 20px;
+            position: absolute; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100%;
+            background: rgba(10, 4, 8, 0.95); backdrop-filter: blur(20px);
+            z-index: 100; transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 50px 30px; border-right: 1px solid var(--border);
         }
         .sidebar.open { left: 0; }
-        .sidebar-item { padding: 15px 0; border-bottom: 1px solid #333; color: #fff; font-size: 16px; cursor: pointer; }
+        .sidebar-header { 
+            font-family: 'Playfair Display', serif; font-size: 28px; 
+            color: var(--accent-gold); margin-bottom: 40px; font-style: italic;
+        }
+        .sidebar-item { 
+            padding: 18px 0; border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
+            color: var(--text-main); font-size: 15px; letter-spacing: 1px;
+        }
+        .setting-input-group label { font-size: 11px; color: var(--text-sub); }
         .setting-input-group input { 
-            width: 100%; background: #222; border: 1px solid #444; color: #fff; 
-            padding: 10px; font-size: 16px; border-radius: 5px; margin-top: 5px;
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+            color: #fff; padding: 12px; font-size: 16px; border-radius: 8px; margin-top: 8px;
         }
 
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 90; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 90; }
         .overlay.show { display: block; }
         input[type="file"] { display: none; }
+
+        /* スクロールバー非表示 */
+        ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
 
 <div class="phone-container" id="mainContainer">
+    <!-- サイドメニュー -->
     <div class="sidebar" id="sidebar">
-        <div style="font-weight: bold; font-size: 20px; color: var(--accent-color); margin-bottom: 20px;">MENU</div>
+        <div class="sidebar-header">Collection</div>
         <div id="page-list"></div>
-        <div class="sidebar-item" onclick="addNewPage()" style="color: var(--accent-color);">＋ ページを追加</div>
-        <div style="margin-top: 30px; font-size: 12px; color: var(--text-sub);">Settings</div>
-        <div class="setting-input-group"><label>P1名</label><input type="text" id="set-p1" oninput="updateParamNames()"></div>
-        <div class="setting-input-group"><label>P2名</label><input type="text" id="set-p2" oninput="updateParamNames()"></div>
-        <div class="setting-input-group"><label>P3名</label><input type="text" id="set-p3" oninput="updateParamNames()"></div>
-        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 30px; text-align: center; opacity: 0.5;">閉じる</div>
+        <div class="sidebar-item" onclick="addNewPage()" style="color: var(--accent-pink); font-weight: bold;">＋ Add New Story</div>
+        
+        <div style="margin-top: 40px; font-size: 11px; color: var(--accent-gold); letter-spacing: 2px;">SETTINGS</div>
+        <div class="setting-input-group"><label>Parameter I</label><input type="text" id="set-p1" oninput="updateParamNames()"></div>
+        <div class="setting-input-group"><label>Parameter II</label><input type="text" id="set-p2" oninput="updateParamNames()"></div>
+        <div class="setting-input-group"><label>Parameter III</label><input type="text" id="set-p3" oninput="updateParamNames()"></div>
+        
+        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 40px; text-align: center; opacity: 0.5; font-size: 12px;">Close</div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
+    <!-- ナビバー -->
     <div class="nav-bar">
-        <div onclick="toggleMenu()" style="font-size:24px; padding:10px;">☰</div>
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
         <input type="text" class="page-title-input" id="pageTitle" oninput="saveCurrentState()">
         <div style="width:40px;"></div>
     </div>
 
+    <!-- 上部固定 -->
     <div class="fixed-header">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
-            <div id="placeholder" style="color:#444;">📷 UPLOAD</div>
+            <div id="placeholder" style="color:var(--text-sub); font-size: 12px; letter-spacing: 2px;">TAP TO REVEAL</div>
             <img id="preview" style="display:none;">
             <input type="file" id="fileInput" accept="image/*">
         </div>
@@ -155,44 +213,55 @@
         </div>
     </div>
 
-    <div class="scroll-content">
-        <div style="font-size:12px; color:var(--accent-color); margin-bottom:10px;">MEMO</div>
-        <textarea class="memo-textarea" id="memoField" oninput="saveCurrentState()" placeholder="メモを入力..."></textarea>
+    <!-- スクロールエリア -->
+    <div class="scroll-content" id="scrollArea">
+        <div class="memo-label">SECRET NOTES</div>
+        <textarea class="memo-textarea" id="memoField" oninput="saveCurrentState()" placeholder="Write your thoughts..."></textarea>
+        <div style="height: 120px;"></div>
     </div>
 </div>
 
 <script>
-    let appData = { currentIndex: 0, paramNames: ["近さ", "固さ", "見た目"], pages: [{ title: "ページ①", img: null, p1: 1, p2: 1, p3: 1, memo: "" }] };
+    let appData = { currentIndex: 0, paramNames: ["近さ", "固さ", "見た目"], pages: [{ title: "Story 01", img: null, p1: 1, p2: 1, p3: 1, memo: "" }] };
 
-    // 保存（GitHub Pages/localStorage対策）
-    function saveToStorage() {
-        try { localStorage.setItem('myAppData_vFinal', JSON.stringify(appData)); } catch (e) { alert("保存容量がいっぱいです。画像を消すか別のページを削除してください。"); }
+    // --- キーボード高さズレ対策 ---
+    function fixLayout() {
+        window.scrollTo(0, 0);
+        document.body.style.height = window.visualViewport.height + 'px';
     }
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', fixLayout);
+        window.visualViewport.addEventListener('scroll', fixLayout);
+    }
+    document.addEventListener('focusout', () => {
+        setTimeout(() => { window.scrollTo(0, 0); }, 50);
+    });
 
-    // 画像のリサイズ処理（これ重要！）
+    // --- 画像リサイズ保存（localStorage対策） ---
     function resizeImage(file, callback) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = (e) => {
             const img = new Image();
-            img.onload = function() {
+            img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 600; // 横幅を600pxに制限して軽量化
-                let width = img.width;
-                let height = img.height;
+                const MAX_WIDTH = 500;
+                let width = img.width, height = img.height;
                 if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.7)); // JPEG形式で圧縮して保存
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                callback(canvas.toDataURL('image/jpeg', 0.6));
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    // 以下、基本ロジック
+    // --- 保存 & 読み込み ---
+    function saveToStorage() {
+        try { localStorage.setItem('myAppData_SexyUI', JSON.stringify(appData)); } catch (e) { alert("Memory Full"); }
+    }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vFinal');
+        const saved = localStorage.getItem('myAppData_SexyUI');
         if (saved) { appData = JSON.parse(saved); }
         document.getElementById('set-p1').value = appData.paramNames[0];
         document.getElementById('set-p2').value = appData.paramNames[1];
@@ -207,10 +276,9 @@
         ['p1', 'p2', 'p3'].forEach((key, idx) => {
             document.querySelector(`.id-${key}`).innerText = appData.paramNames[idx];
             const bars = document.getElementById(`ind-${key}`).querySelectorAll('.bar');
-            bars.forEach((bar, i) => { bar.classList.toggle('active', i < p[key]); });
+            bars.forEach((bar, i) => bar.classList.toggle('active', i < p[key]));
         });
-        const img = document.getElementById('preview');
-        const ph = document.getElementById('placeholder');
+        const img = document.getElementById('preview'), ph = document.getElementById('placeholder');
         if (p.img) { img.src = p.img; img.style.display = 'block'; ph.style.display = 'none'; }
         else { img.style.display = 'none'; ph.style.display = 'block'; }
     }
@@ -243,7 +311,7 @@
     }
 
     function addNewPage() {
-        appData.pages.push({ title: `ページ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1, memo: "" });
+        appData.pages.push({ title: `Story 0${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1, memo: "" });
         appData.currentIndex = appData.pages.length - 1;
         updateUI(); saveToStorage(); toggleMenu();
     }
@@ -259,7 +327,7 @@
         appData.pages.forEach((p, i) => {
             const item = document.createElement('div');
             item.className = 'sidebar-item';
-            item.innerText = p.title || `無題 ${i+1}`;
+            item.innerText = p.title || `Untitled ${i+1}`;
             item.onclick = () => switchPage(i);
             list.appendChild(item);
         });
@@ -267,20 +335,14 @@
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         if (e.target.files[0]) {
-            resizeImage(e.target.files[0], function(base64Data) {
-                appData.pages[appData.currentIndex].img = base64Data;
+            resizeImage(e.target.files[0], (data) => {
+                appData.pages[appData.currentIndex].img = data;
                 updateUI(); saveToStorage();
             });
         }
     });
 
-    // 起動時にロード
     window.onload = loadFromStorage;
-
-    // 入力後のズレ防止：フォーカスが外れたらスクロール位置をリセット
-    document.addEventListener('focusout', function() {
-        window.scrollTo(0, 0);
-    });
 </script>
 
 </body>
