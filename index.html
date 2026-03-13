@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iPhone 13 Pro Pro-Note</title>
+    <title>iPhone 13 Pro Optimized Note</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -14,6 +14,8 @@
             --border-color: #333;
             --bar-inactive: #383838;
             --sidebar-bg: #1a1a1a;
+            /* 境界線を下げた新しい高さ設定 */
+            --header-h: 260px; 
         }
 
         * { touch-action: manipulation; box-sizing: border-box; }
@@ -45,30 +47,33 @@
         .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 24px; padding: 0 15px; cursor: pointer; }
         .page-title-input { width: 120px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 上部エリア：入力時に完全に畳む */
+        /* 上部エリア（境目を下げて拡大） */
         .fixed-header {
-            display: flex; height: 200px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease-in-out; overflow: hidden;
+            display: flex; height: var(--header-h); flex-shrink: 0; border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
         }
+        /* 入力中：上部を畳んで入力欄を画面上端へ */
         .phone-container.typing-mode .fixed-header { height: 0; border-bottom: none; opacity: 0; }
 
         .image-area { width: 60%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); cursor: pointer; }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
-        .param-area { width: 40%; display: flex; flex-direction: column; justify-content: center; padding: 5px; background-color: var(--card-bg); align-items: center; }
+        
+        .param-area { width: 40%; display: flex; flex-direction: column; justify-content: center; padding: 10px 5px; background-color: var(--card-bg); align-items: center; }
 
-        .tag-row { display: flex; gap: 4px; width: 92%; margin-bottom: 8px; }
-        .tag-btn { flex: 1; height: 26px; border-radius: 6px; font-size: 10px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; }
+        .tag-row { display: flex; gap: 4px; width: 92%; margin-bottom: 12px; }
+        .tag-btn { flex: 1; height: 28px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .tag-btn.active { background-color: var(--accent-color); color: #000; box-shadow: 0 0 10px var(--accent-color); }
         .tag-btn.inactive { background-color: #2a2a2a; color: #666; }
 
-        .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; width: 100%; }
-        .param-label { font-size: 9px; color: var(--text-sub); margin-bottom: 2px; }
+        .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; width: 100%; }
+        .param-label { font-size: 9px; color: var(--text-sub); margin-bottom: 4px; font-weight: 600; letter-spacing: 1px; }
+        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 22px; padding: 2px 10px; cursor: pointer; }
+        
         .indicator-container { display: flex; gap: 3px; }
-        .bar { width: 5px; height: 16px; background-color: var(--bar-inactive); border-radius: 1px; }
+        .bar { width: 5px; height: 18px; background-color: var(--bar-inactive); border-radius: 1px; transition: 0.2s; }
         .bar.active { background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
-        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 22px; padding: 2px 8px; cursor: pointer; }
 
-        /* 下部メインエリア（左右分割） */
+        /* 下部：左右分割エリア */
         .memo-split-container {
             flex: 1; display: flex; overflow: hidden; background-color: var(--bg-dark);
         }
@@ -76,43 +81,57 @@
         /* 左 1/4: カード選択リスト */
         .card-selection-list {
             width: 25%; border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; background-color: rgba(255,255,255,0.02);
+            display: flex; flex-direction: column; background-color: rgba(255,255,255,0.01);
         }
-        .card-list-items { flex: 1; overflow-y: auto; }
+        .card-list-items { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .list-item {
-            padding: 12px 8px; font-size: 11px; border-bottom: 1px solid #222;
-            color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            padding: 15px 8px; font-size: 11px; border-bottom: 1px solid #222;
+            color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             transition: 0.2s; cursor: pointer;
         }
-        .list-item.active { color: var(--accent-color); font-weight: bold; background-color: rgba(255,45,117,0.1); border-right: 2px solid var(--accent-color); }
+        .list-item.active { 
+            color: var(--accent-color); font-weight: bold; 
+            background-color: rgba(255,45,117,0.08); 
+            border-right: 2px solid var(--accent-color); 
+        }
         .add-card-btn {
-            height: 50px; border: none; background: transparent;
-            color: var(--accent-color); font-size: 24px; border-top: 1px solid var(--border-color);
+            height: 60px; border: none; background: transparent;
+            color: var(--accent-color); font-size: 28px; border-top: 1px solid var(--border-color);
             display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            padding-bottom: 5px;
         }
 
         /* 右 3/4: カード内容編集 */
         .card-edit-area {
             width: 75%; display: flex; flex-direction: column; padding: 15px;
+            transition: transform 0.3s ease;
         }
         .card-title-input {
             background: transparent; border: none; color: var(--accent-color);
-            font-size: 20px; font-weight: 800; margin-bottom: 10px; outline: none;
+            font-size: 20px; font-weight: 800; margin-bottom: 12px; outline: none;
             width: 100%; text-transform: uppercase;
         }
         .memo-textarea {
             flex: 1; background: transparent; border: none;
             color: #ddd; font-size: 16px; line-height: 1.6; resize: none; outline: none;
-            overflow: hidden;
+            overflow: hidden; padding-bottom: 20px;
         }
 
         /* サイドメニュー */
         .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 320px; height: 100%; background-color: var(--sidebar-bg); z-index: 300; transition: left 0.3s ease; padding: 60px 20px; overflow-y: auto; }
         .sidebar.open { left: 0; }
         .sidebar-item { padding: 14px 0; border-bottom: 1px solid #333; color: #fff; font-size: 16px; }
+        
+        .setting-input-group { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
+        .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 4px; }
+        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 14px; border-radius: 8px; margin-bottom: 12px; outline: none; }
+
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 250; }
         .overlay.show { display: block; }
         input[type="file"] { display: none; }
+
+        /* スクロールバー非表示 */
+        ::-webkit-scrollbar { width: 0; height: 0; }
     </style>
 </head>
 <body>
@@ -123,12 +142,15 @@
         <div style="font-weight: bold; color: var(--accent-color); font-size: 18px; margin-bottom: 20px;">MENU</div>
         <div id="sidebar-page-list"></div>
         <div class="sidebar-item" onclick="addNewDataPage()" style="color: var(--accent-color);">＋ ページを追加</div>
-        <div style="margin-top: 20px;">
-            <label style="font-size:10px; color:var(--text-sub);">P1名</label><input type="text" id="set-p1" oninput="updateSettings()" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:8px; border-radius:5px; margin-bottom:10px;">
-            <label style="font-size:10px; color:var(--text-sub);">P2名</label><input type="text" id="set-p2" oninput="updateSettings()" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:8px; border-radius:5px; margin-bottom:10px;">
-            <label style="font-size:10px; color:var(--text-sub);">P3名</label><input type="text" id="set-p3" oninput="updateSettings()" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:8px; border-radius:5px; margin-bottom:10px;">
+        
+        <div class="setting-input-group">
+            <div style="font-size: 11px; color: var(--accent-color); margin-bottom: 10px; font-weight: bold;">SETTINGS</div>
+            <label>P1名</label><input type="text" id="set-p1" oninput="updateSettings()">
+            <label>P2名</label><input type="text" id="set-p2" oninput="updateSettings()">
+            <label>P3名</label><input type="text" id="set-p3" oninput="updateSettings()">
         </div>
-        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 30px; text-align: center; opacity: 0.5;">閉じる</div>
+        
+        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 30px; text-align: center; opacity: 0.5; font-size: 12px;">閉じる</div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
@@ -143,7 +165,7 @@
         <div style="width:44px;"></div>
     </div>
 
-    <!-- 画像・パラメータエリア -->
+    <!-- 画像・パラメータエリア (260px) -->
     <div class="fixed-header" id="fixedHeader">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
             <div id="placeholder" style="color:#444; font-size: 10px;">📷 UPLOAD</div>
@@ -161,17 +183,17 @@
 
     <!-- 分割メモエリア -->
     <div class="memo-split-container">
-        <!-- 左：リスト -->
+        <!-- 左：リスト (1/4) -->
         <div class="card-selection-list">
             <div class="card-list-items" id="cardListItems"></div>
             <button class="add-card-btn" onclick="addNewMemoCard()">＋</button>
         </div>
-        <!-- 右：編集 -->
+        <!-- 右：編集 (3/4) -->
         <div class="card-edit-area">
-            <input type="text" id="cardTitle" class="card-title-input" oninput="saveCurrentState()" onfocus="setTyping(true)" onblur="setTyping(false)">
+            <input type="text" id="cardTitle" class="card-title-input" placeholder="CARD TITLE" oninput="saveCurrentState()" onfocus="setTyping(true)" onblur="setTyping(false)">
             <textarea id="memoField" class="memo-textarea" 
                 onfocus="setTyping(true)" onblur="setTyping(false)" 
-                oninput="updateMemoText(this)" placeholder="Details..."></textarea>
+                oninput="updateMemoText(this)" placeholder="Details here..."></textarea>
         </div>
     </div>
 </div>
@@ -188,7 +210,6 @@
         }]
     };
 
-    // --- ページ切り替え ---
     function changeDataPage(dir) {
         appData.currentIndex = (appData.currentIndex + dir + appData.pages.length) % appData.pages.length;
         renderAll(); saveToStorage();
@@ -204,7 +225,6 @@
         renderAll(); toggleMenu(); saveToStorage();
     }
 
-    // --- メモカード操作 ---
     function selectMemoCard(idx) {
         appData.pages[appData.currentIndex].currentMemoIdx = idx;
         renderAll();
@@ -212,12 +232,11 @@
 
     function addNewMemoCard() {
         const p = appData.pages[appData.currentIndex];
-        p.memos.push({ title: "NEW CARD", content: "" });
+        p.memos.push({ title: `CARD ${p.memos.length + 1}`, content: "" });
         p.currentMemoIdx = p.memos.length - 1;
         renderAll(); saveToStorage();
     }
 
-    // --- UI更新 ---
     function renderAll() {
         const p = appData.pages[appData.currentIndex];
         const m = p.memos[p.currentMemoIdx];
@@ -226,7 +245,6 @@
         document.getElementById('cardTitle').value = m.title;
         document.getElementById('memoField').value = m.content;
 
-        // 左側リストの描画
         const listContainer = document.getElementById('cardListItems');
         listContainer.innerHTML = '';
         p.memos.forEach((memo, i) => {
@@ -237,7 +255,6 @@
             listContainer.appendChild(item);
         });
 
-        // パラメータ・タグの反映
         document.getElementById('tagButton1').innerText = appData.tagName1;
         document.getElementById('tagButton1').className = p.tagActive1 ? 'tag-btn active' : 'tag-btn inactive';
         document.getElementById('tagButton2').innerText = appData.tagName2;
@@ -262,7 +279,6 @@
         else { img.style.display = 'none'; ph.style.display = 'block'; }
     }
 
-    // --- その他ロジック ---
     function updateMemoText(el) {
         const p = appData.pages[appData.currentIndex];
         if (el.scrollHeight > el.clientHeight) { el.value = p.memos[p.currentMemoIdx].content; return; }
@@ -273,7 +289,6 @@
         const p = appData.pages[appData.currentIndex];
         p.title = document.getElementById('pageTitle').value;
         p.memos[p.currentMemoIdx].title = document.getElementById('cardTitle').value;
-        // リストの名前を即座に更新するために再描画
         const listItems = document.querySelectorAll('.list-item');
         if(listItems[p.currentMemoIdx]) listItems[p.currentMemoIdx].innerText = p.memos[p.currentMemoIdx].title;
         saveToStorage();
@@ -296,11 +311,12 @@
     function setTyping(isTyping) {
         if (isTyping) document.getElementById('mainContainer').classList.add('typing-mode');
         else document.getElementById('mainContainer').classList.remove('typing-mode');
+        // キーボード表示による強制的な画面ズレをリセット
         setTimeout(() => window.scrollTo(0,0), 10);
     }
-    function saveToStorage() { localStorage.setItem('myAppData_vSplitUI', JSON.stringify(appData)); }
+    function saveToStorage() { localStorage.setItem('myAppData_iPhoneNote', JSON.stringify(appData)); }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vSplitUI');
+        const saved = localStorage.getItem('myAppData_iPhoneNote');
         if (saved) { appData = JSON.parse(saved); }
         document.getElementById('set-p1').value = appData.paramNames[0];
         document.getElementById('set-p2').value = appData.paramNames[1];
