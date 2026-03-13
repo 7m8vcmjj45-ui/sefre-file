@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iPhone 13 Pro Optimized App</title>
+    <title>iPhone 13 Pro Fixed App</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -16,7 +16,6 @@
             --sidebar-bg: #1a1a1a;
         }
 
-        /* ダブルタップズーム抑制 & Safe Area 考慮 */
         * { touch-action: manipulation; box-sizing: border-box; }
 
         html, body {
@@ -27,7 +26,7 @@
             color: var(--text-main);
             overflow: hidden; 
             position: fixed;
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .phone-container {
@@ -36,7 +35,6 @@
             background-color: var(--bg-dark);
             display: flex; flex-direction: column;
             position: relative; overflow: hidden;
-            /* iPhoneのノッチと下部バーの余白を自動確保 */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -45,9 +43,8 @@
         .nav-bar {
             height: 50px; display: flex; align-items: center; padding: 0 10px;
             background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0;
-            z-index: 10;
+            z-index: 20;
         }
-        .menu-btn { font-size: 24px; cursor: pointer; padding: 10px; color: var(--text-main); }
         .page-nav { flex: 1; display: flex; align-items: center; justify-content: center; }
         .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 24px; padding: 5px 15px; cursor: pointer; }
         .page-title-input { width: 120px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
@@ -55,54 +52,66 @@
         /* 固定上部（画像 & パラメータ） */
         .fixed-header {
             display: flex; height: 230px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease-in-out;
+            transition: all 0.25s ease-out;
+            overflow: hidden;
         }
-        /* 入力モード：iPhoneのキーボード高さを考慮して大幅に縮小 */
-        .phone-container.typing-mode .fixed-header { height: 60px; opacity: 0.1; pointer-events: none; }
+        /* 入力モード：上部を畳んでメモ枠のスペースを最大化 */
+        .phone-container.typing-mode .fixed-header {
+            height: 0;
+            border-bottom: none;
+            opacity: 0;
+        }
 
         .image-area { width: 62%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); position: relative; }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
         .param-area { width: 38%; display: flex; flex-direction: column; justify-content: center; padding: 5px; background-color: var(--card-bg); align-items: center; }
 
         .tag-row { display: flex; gap: 4px; width: 92%; margin-bottom: 12px; }
-        .tag-btn { flex: 1; height: 30px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .tag-btn { flex: 1; height: 30px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; display: flex; align-items: center; justify-content: center; }
         .tag-btn.active { background-color: var(--accent-color); color: #000; box-shadow: 0 0 10px var(--accent-color); }
         .tag-btn.inactive { background-color: #2a2a2a; color: #666; }
 
+        /* パラメータ操作系 */
         .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; width: 100%; }
         .param-label { font-size: 10px; color: var(--text-sub); margin-bottom: 4px; font-weight: 600; }
         .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 24px; padding: 2px 10px; cursor: pointer; }
-        .btn-ctrl:active { color: var(--accent-color); transform: scale(1.1); }
-        
         .indicator-container { display: flex; gap: 3px; }
         .bar { width: 5px; height: 18px; background-color: var(--bar-inactive); border-radius: 1px; }
         .bar.active { background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
 
         /* メモスワイプエリア */
-        .memo-swipe-outer { flex: 1; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-dark); }
+        .memo-swipe-outer { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .memo-dots { height: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px; }
+        .phone-container.typing-mode .memo-dots { display: none; } /* 入力中はドットを隠す */
+
         .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; transition: 0.3s; }
         .dot.active { background: var(--accent-color); transform: scale(1.4); }
 
         .memo-swipe-container { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .memo-swipe-container::-webkit-scrollbar { display: none; }
 
-        .memo-card-wrapper { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; padding: 10px 15px 30px 15px; display: flex; flex-direction: column; }
+        .memo-card-wrapper { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; padding: 10px 15px 20px 15px; display: flex; flex-direction: column; }
         
-        /* メモカードの枠（画面サイズに合わせて伸縮） */
+        /* メモカードの枠（入力時に画面外に出ないように調整） */
         .memo-frame {
-            flex: 1; max-height: 380px; 
+            flex: 0 0 340px; /* iPhone13Proのキーボード上スペースに合わせた高さ */
             background-color: rgba(255,255,255,0.03);
             border: 1.5px solid var(--border-color); border-radius: 16px;
             display: flex; flex-direction: column; padding: 15px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             overflow: hidden;
+            transition: all 0.25s ease;
         }
+        .phone-container.typing-mode .memo-frame {
+            flex: 1; /* 入力中は残りのスペースを使い切る */
+            max-height: calc(100% - 10px);
+        }
+
         .memo-card-header { font-size: 10px; color: var(--accent-color); margin-bottom: 8px; letter-spacing: 2px; font-weight: bold; }
         .memo-textarea {
             width: 100%; height: 100%; background: transparent; border: none;
             color: #ddd; font-size: 16px; line-height: 1.6; resize: none; outline: none;
-            overflow: hidden; /* 縦スクロール禁止 */
+            overflow: hidden; /* スクロール禁止 */
         }
 
         /* サイドメニュー */
@@ -143,6 +152,7 @@
         <div style="width:44px;"></div>
     </div>
 
+    <!-- 入力時に高さ0になるエリア -->
     <div class="fixed-header" id="fixedHeader">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
             <div id="placeholder" style="color:#444; font-size: 10px;">📷 UPLOAD</div>
@@ -179,7 +189,6 @@
     const swipeContainer = document.getElementById('memoSwipeContainer');
     const mainContainer = document.getElementById('mainContainer');
 
-    // ページ切り替え
     function changeDataPage(dir) {
         let next = appData.currentIndex + dir;
         if (next < 0) next = appData.pages.length - 1;
@@ -199,7 +208,6 @@
         renderAll(); toggleMenu(); saveToStorage();
     }
 
-    // メモスワイプ監視
     swipeContainer.addEventListener('scroll', () => {
         const index = Math.round(swipeContainer.scrollLeft / swipeContainer.clientWidth);
         const p = appData.pages[appData.currentIndex];
@@ -257,7 +265,6 @@
     }
 
     function updateMemoContent(el, memoIdx) {
-        // 固定枠からはみ出る入力をブロック
         if (el.scrollHeight > el.clientHeight) {
             el.value = appData.pages[appData.currentIndex].memos[memoIdx].content;
             return;
@@ -301,8 +308,12 @@
     }
 
     function setTyping(isTyping) {
-        if (isTyping) mainContainer.classList.add('typing-mode');
-        else { mainContainer.classList.remove('typing-mode'); window.scrollTo(0,0); }
+        if (isTyping) {
+            mainContainer.classList.add('typing-mode');
+        } else {
+            mainContainer.classList.remove('typing-mode');
+            window.scrollTo(0,0);
+        }
     }
 
     function changeVal(key, diff) {
@@ -329,9 +340,9 @@
         renderAll(); saveToStorage();
     }
 
-    function saveToStorage() { localStorage.setItem('myAppData_viPhone13', JSON.stringify(appData)); }
+    function saveToStorage() { localStorage.setItem('myAppData_vProFixed', JSON.stringify(appData)); }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_viPhone13');
+        const saved = localStorage.getItem('myAppData_vProFixed');
         if (saved) { appData = JSON.parse(saved); }
         renderAll();
     }
@@ -375,6 +386,15 @@
             });
         }
     });
+
+    // キーボードによる高さズレを強制補正するスクリプト
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            if (document.activeElement.tagName === 'TEXTAREA') {
+                window.scrollTo(0, 0);
+            }
+        });
+    }
 
     window.onload = loadFromStorage;
 </script>
