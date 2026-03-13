@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iPhone 13 Pro Stable App</title>
+    <title>iPhone 13 Pro Stable Fix</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -23,7 +23,7 @@
             height: 100%; height: 100dvh; width: 100vw;
             background-color: #000; color: var(--text-main);
             overflow: hidden; position: fixed;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
         }
 
         .phone-container {
@@ -36,7 +36,7 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ナビバー（ページ切り替え） */
+        /* ナビバー */
         .nav-bar {
             height: 50px; display: flex; align-items: center; padding: 0 10px;
             background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0; z-index: 100;
@@ -45,13 +45,13 @@
         .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 24px; padding: 10px; cursor: pointer; }
         .page-title-input { width: 110px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 上部エリア（高さ220px） */
+        /* 上部エリア：通常200px / 入力時100px */
         .fixed-header {
-            display: flex; height: 220px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease; overflow: hidden;
+            display: flex; height: 200px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease-out; overflow: hidden;
         }
-        /* 入力モード：少しだけ畳んで、カードの位置を調整 */
-        .phone-container.typing-mode .fixed-header { height: 50px; opacity: 0.1; pointer-events: none; }
+        /* 上がりすぎ防止のため、0にはせず100px残す */
+        .phone-container.typing-mode .fixed-header { height: 100px; opacity: 0.3; }
 
         .image-area { width: 62%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); cursor: pointer; }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
@@ -69,27 +69,34 @@
         .bar { width: 5px; height: 16px; background-color: var(--bar-inactive); border-radius: 1px; }
         .bar.active { background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
 
-        /* メモエリア（捲りボタン式） */
+        /* メモエリア */
         .memo-outer {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 0 20px; background-color: var(--bg-dark);
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            background-color: var(--bg-dark);
+            padding: 15px 20px;
         }
 
+        /* メモ枠：高さ340px固定（伸縮・移動なし） */
         .memo-frame {
             height: 340px; width: 100%;
             background-color: rgba(255,255,255,0.03);
             border: 1.5px solid var(--border-color); border-radius: 16px;
             display: flex; flex-direction: column; padding: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease;
         }
-        .phone-container.typing-mode .memo-frame { border-color: var(--accent-color); transform: translateY(-30px); }
+        .phone-container.typing-mode .memo-frame { border-color: var(--accent-color); }
 
-        /* カードごとのナビ（捲りボタン） */
-        .card-nav { display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .card-title-input { flex: 1; background: transparent; border: none; color: var(--accent-color); font-size: 13px; font-weight: bold; outline: none; text-transform: uppercase; }
-        .card-nav-btn { background: none; border: none; color: #666; font-size: 16px; padding: 0 10px; cursor: pointer; }
-        .card-nav-btn:active { color: var(--accent-color); }
+        /* カードタイトル：大きく太く */
+        .card-nav { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .card-title-input { 
+            flex: 1; background: transparent; border: none; 
+            color: var(--accent-color); 
+            font-size: 20px; /* ★サイズアップ */
+            font-weight: 800; 
+            outline: none; text-transform: uppercase; 
+        }
+        .card-nav-btn { background: none; border: none; color: #666; font-size: 20px; padding: 0 10px; cursor: pointer; }
 
         .memo-textarea {
             width: 100%; height: 100%; background: transparent; border: none;
@@ -100,9 +107,9 @@
         /* サイドメニュー */
         .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 320px; height: 100%; background-color: var(--sidebar-bg); z-index: 300; transition: left 0.3s ease; padding: 60px 20px; overflow-y: auto; }
         .sidebar.open { left: 0; }
-        .sidebar-item { padding: 15px 0; border-bottom: 1px solid #333; color: #fff; font-size: 15px; }
+        .sidebar-item { padding: 14px 0; border-bottom: 1px solid #333; color: #fff; font-size: 16px; }
         .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-top: 15px; }
-        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 14px; border-radius: 8px; margin-top: 5px; outline: none; }
+        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 16px; border-radius: 8px; margin-top: 5px; outline: none; }
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 250; }
         .overlay.show { display: block; }
@@ -114,7 +121,7 @@
 <div class="phone-container" id="mainContainer">
     <!-- サイドバー -->
     <div class="sidebar" id="sidebar">
-        <div style="font-weight: bold; color: var(--accent-color); margin-bottom: 20px;">MENU</div>
+        <div style="font-weight: bold; color: var(--accent-color); font-size: 18px; margin-bottom: 20px;">MENU</div>
         <div id="sidebar-page-list"></div>
         <div class="sidebar-item" onclick="addNewDataPage()" style="color: var(--accent-color);">＋ ページを追加</div>
         <div class="setting-input-group">
@@ -128,7 +135,7 @@
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    <!-- ヘッダーナビ -->
+    <!-- ナビバー -->
     <div class="nav-bar">
         <div onclick="toggleMenu()" style="font-size:24px; padding:10px;">☰</div>
         <div class="page-nav">
@@ -139,7 +146,7 @@
         <div style="width:44px;"></div>
     </div>
 
-    <!-- 画像・パラメータ -->
+    <!-- 上部 -->
     <div class="fixed-header" id="fixedHeader">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
             <div id="placeholder" style="color:#444; font-size: 10px;">📷 UPLOAD</div>
@@ -155,7 +162,7 @@
         </div>
     </div>
 
-    <!-- メモ（ボタンで捲るカード） -->
+    <!-- メモ（ボタン捲り） -->
     <div class="memo-outer">
         <div class="memo-frame">
             <div class="card-nav">
@@ -171,7 +178,6 @@
 </div>
 
 <script>
-    // --- 初期データ構造 ---
     let appData = {
         currentIndex: 0,
         tagName1: "TAG 1", tagName2: "TAG 2",
@@ -179,12 +185,10 @@
         pages: [{
             title: "PAGE 1", img: null, p1: 1, p2: 1, p3: 1,
             tagActive1: false, tagActive2: false,
-            currentMemoIdx: 0,
-            memos: [{ title: "CARD 1", content: "" }]
+            currentMemoIdx: 0, memos: [{ title: "CARD 1", content: "" }]
         }]
     };
 
-    // --- ページ & カード操作 ---
     function changeDataPage(dir) {
         appData.currentIndex = (appData.currentIndex + dir + appData.pages.length) % appData.pages.length;
         renderAll(); saveToStorage();
@@ -203,13 +207,7 @@
     function changeMemoCard(dir) {
         const p = appData.pages[appData.currentIndex];
         const nextIdx = p.currentMemoIdx + dir;
-        
-        // 前のカードが空なら自動削除（オプション）
-        const cur = p.memos[p.currentMemoIdx];
-        if (dir === -1 && cur.content.trim() === "" && p.memos.length > 1) {
-            p.memos.splice(p.currentMemoIdx, 1);
-            p.currentMemoIdx = Math.max(0, nextIdx);
-        } else if (nextIdx >= p.memos.length) {
+        if (nextIdx >= p.memos.length) {
             p.memos.push({ title: `CARD ${p.memos.length + 1}`, content: "" });
             p.currentMemoIdx = nextIdx;
         } else if (nextIdx >= 0) {
@@ -218,20 +216,16 @@
         renderAll(); saveToStorage();
     }
 
-    // --- UI更新 ---
     function renderAll() {
         const p = appData.pages[appData.currentIndex];
         const m = p.memos[p.currentMemoIdx];
-
         document.getElementById('pageTitle').value = p.title;
         document.getElementById('cardTitle').value = m.title;
         document.getElementById('memoField').value = m.content;
-
         document.getElementById('tagButton1').innerText = appData.tagName1;
         document.getElementById('tagButton1').className = p.tagActive1 ? 'tag-btn active' : 'tag-btn inactive';
         document.getElementById('tagButton2').innerText = appData.tagName2;
         document.getElementById('tagButton2').className = p.tagActive2 ? 'tag-btn active' : 'tag-btn inactive';
-        
         const paramBox = document.getElementById('params-render');
         paramBox.innerHTML = '';
         ['p1', 'p2', 'p3'].forEach((key, idx) => {
@@ -240,20 +234,16 @@
                     <div class="param-label">${appData.paramNames[idx]}</div>
                     <div style="display:flex; align-items:center;">
                         <button class="btn-ctrl" onclick="changeVal('${key}', -1)">◀</button>
-                        <div class="indicator-container">
-                            ${[1,2,3,4,5].map(i => `<div class="bar ${i <= p[key] ? 'active' : ''}"></div>`).join('')}
-                        </div>
+                        <div class="indicator-container">${[1,2,3,4,5].map(i => `<div class="bar ${i <= p[key] ? 'active' : ''}"></div>`).join('')}</div>
                         <button class="btn-ctrl" onclick="changeVal('${key}', 1)">▶</button>
                     </div>
                 </div>`;
         });
-
         const img = document.getElementById('preview'), ph = document.getElementById('placeholder');
         if (p.img) { img.src = p.img; img.style.display = 'block'; ph.style.display = 'none'; }
         else { img.style.display = 'none'; ph.style.display = 'block'; }
     }
 
-    // --- 各種保存/更新 ---
     function updateMemoText(el) {
         if (el.scrollHeight > el.clientHeight) { el.value = appData.pages[appData.currentIndex].memos[appData.pages[appData.currentIndex].currentMemoIdx].content; return; }
         appData.pages[appData.currentIndex].memos[appData.pages[appData.currentIndex].currentMemoIdx].content = el.value;
@@ -285,12 +275,12 @@
     function setTyping(isTyping) {
         if (isTyping) document.getElementById('mainContainer').classList.add('typing-mode');
         else document.getElementById('mainContainer').classList.remove('typing-mode');
-        setTimeout(() => window.scrollTo(0,0), 10);
+        window.scrollTo(0,0);
     }
 
-    function saveToStorage() { localStorage.setItem('myAppData_vFinalStable', JSON.stringify(appData)); }
+    function saveToStorage() { localStorage.setItem('myAppData_vPro13', JSON.stringify(appData)); }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vFinalStable');
+        const saved = localStorage.getItem('myAppData_vPro13');
         if (saved) { appData = JSON.parse(saved); }
         document.getElementById('set-tag-name1').value = appData.tagName1;
         document.getElementById('set-tag-name2').value = appData.tagName2;
@@ -314,7 +304,6 @@
         });
     }
 
-    // 画像処理
     function resizeImage(file, callback) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -334,10 +323,7 @@
     }
     document.getElementById('fileInput').addEventListener('change', function(e) {
         if (e.target.files[0]) {
-            resizeImage(e.target.files[0], (data) => {
-                appData.pages[appData.currentIndex].img = data;
-                renderAll(); saveToStorage();
-            });
+            resizeImage(e.target.files[0], (data) => { appData.pages[appData.currentIndex].img = data; renderAll(); saveToStorage(); });
         }
     });
 
