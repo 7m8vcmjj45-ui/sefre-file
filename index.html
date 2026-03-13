@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- user-scalable=no を追加してズームを抑制 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stylish Pink UI - No Zoom</title>
+    <!-- ズームを徹底的に抑制する設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Stylish App - Fixed Version</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -17,147 +17,120 @@
             --sidebar-bg: #1a1a1a;
         }
 
-        /* 画面全体でダブルタップズームを抑制 */
-        * {
-            touch-action: manipulation;
-        }
+        /* ダブルタップズームの抑制 */
+        * { touch-action: manipulation; box-sizing: border-box; }
 
         body {
             margin: 0; padding: 0;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #222;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #000;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; color: var(--text-main); overflow: hidden;
-            /* テキスト選択も無効化するとよりアプリらしくなります（任意） */
-            -webkit-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; user-select: none;
         }
 
-        /* 入力欄などは操作できるようにする */
-        input, textarea {
-            touch-action: auto;
-            -webkit-user-select: text;
-            user-select: text;
-        }
-
+        /* iOSでの入力時ズレ防止のため、コンテナのサイズを固定 */
         .phone-container {
-            width: 375px; height: 750px;
+            width: 100%; max-width: 414px; height: 100%;
             background-color: var(--bg-dark);
             display: flex; flex-direction: column;
-            border: 10px solid #000; border-radius: 40px;
-            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            position: relative;
+            position: relative; overflow: hidden;
+        }
+        @media (min-width: 500px) {
+            .phone-container { height: 800px; border: 8px solid #000; border-radius: 40px; }
         }
 
+        /* ヘッダー：16px以上に設定してズーム防止 */
         .nav-bar {
-            height: 60px; display: flex; align-items: center; padding: 0 20px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); z-index: 10;
+            height: 60px; display: flex; align-items: center; padding: 0 15px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0;
         }
-
-        .menu-btn { font-size: 24px; cursor: pointer; width: 30px; padding: 10px; margin-left: -10px; }
-
         .page-title-input {
             flex: 1; background: transparent; border: none; color: var(--text-main);
-            text-align: center; font-size: 16px; font-weight: bold; outline: none; letter-spacing: 1px;
+            text-align: center; font-size: 18px; font-weight: bold; outline: none;
+            -webkit-user-select: text; user-select: text;
         }
 
+        /* 固定上部（画像・パラメータ） */
         .fixed-header {
-            display: flex; height: 260px;
-            flex-shrink: 0; border-bottom: 1px solid var(--border-color);
+            display: flex; height: 260px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
         }
-
         .image-area {
-            width: 66.6%; background-color: #1a1a1a; display: flex; justify-content: center;
-            align-items: center; border-right: 1px solid var(--border-color); position: relative; cursor: pointer;
+            width: 65%; background-color: #1a1a1a; display: flex; justify-content: center;
+            align-items: center; border-right: 1px solid var(--border-color); cursor: pointer;
         }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
 
         .param-area {
-            width: 33.3%; display: flex; flex-direction: column; justify-content: space-around;
-            padding: 15px 0; background-color: var(--card-bg);
+            width: 35%; display: flex; flex-direction: column; justify-content: space-around;
+            padding: 10px 0; background-color: var(--card-bg);
         }
-
         .param-group { display: flex; flex-direction: column; align-items: center; }
-        .param-label { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; font-weight: 600; }
-        .control-row { display: flex; align-items: center; gap: 8px; }
-
-        .btn-ctrl { 
-            background: none; border: none; color: var(--text-main); 
-            font-size: 20px; font-weight: bold;
-            cursor: pointer; opacity: 0.6; padding: 10px; /* 当たり判定を広く */
-            transition: 0.1s;
-        }
-        .btn-ctrl:active { color: var(--accent-color); opacity: 1; transform: scale(1.2); }
-
+        .param-label { font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
+        .btn-ctrl { background: none; border: none; color: var(--text-main); font-size: 22px; padding: 5px 12px; cursor: pointer; }
+        
         .indicator-container { display: flex; gap: 4px; }
-        .bar { 
-            width: 6px; height: 24px;
-            background-color: var(--bar-inactive); 
-            border-radius: 2px; 
-        }
-        .bar.active { 
-            background-color: var(--accent-color); 
-            box-shadow: 0 0 10px var(--accent-color);
-        }
+        .bar { width: 6px; height: 24px; background-color: var(--bar-inactive); border-radius: 2px; }
+        .bar.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
 
+        /* メモ欄：16px以上に設定してズーム防止 */
         .scroll-content { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-dark); }
-        .memo-label { font-size: 12px; color: var(--accent-color); margin-bottom: 10px; letter-spacing: 1px; }
         .memo-textarea {
-            width: 100%; height: 350px; background-color: rgba(255,255,255,0.03);
+            width: 100%; height: 300px; background-color: rgba(255,255,255,0.03);
             border: 1px solid var(--border-color); border-radius: 10px; padding: 15px;
-            color: #ccc; font-size: 14px; line-height: 1.6; resize: none; outline: none; box-sizing: border-box;
+            color: #ccc; font-size: 16px; line-height: 1.5; resize: none; outline: none;
+            -webkit-user-select: text; user-select: text; touch-action: auto;
         }
 
-        /* サイドメニュー等、以前のスタイルを維持 */
+        /* サイドメニュー */
         .sidebar {
-            position: absolute; top: 0; left: -100%; width: 280px; height: 100%;
+            position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%;
             background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5); padding: 40px 20px; box-sizing: border-box;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8); padding: 40px 20px;
         }
         .sidebar.open { left: 0; }
-        .sidebar-item { padding: 15px 0; border-bottom: 1px solid #333; cursor: pointer; color: var(--text-main); font-size: 14px; }
-        .setting-input-group { margin-bottom: 15px; }
-        .setting-input-group label { font-size: 11px; display: block; color: var(--text-sub); margin-bottom: 5px; }
-        .setting-input-group input {
-            background: #222; border: 1px solid #444; color: #fff; padding: 8px; width: 100%;
-            box-sizing: border-box; border-radius: 4px; outline: none;
+        .sidebar-item { padding: 15px 0; border-bottom: 1px solid #333; color: #fff; font-size: 16px; cursor: pointer; }
+        .setting-input-group input { 
+            width: 100%; background: #222; border: 1px solid #444; color: #fff; 
+            padding: 10px; font-size: 16px; border-radius: 5px; margin-top: 5px;
         }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 90; }
+
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 90; }
         .overlay.show { display: block; }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-<div class="phone-container">
+<div class="phone-container" id="mainContainer">
     <div class="sidebar" id="sidebar">
-        <div style="font-weight: bold; font-size: 20px; margin-bottom: 30px; color: var(--accent-color);">MENU</div>
+        <div style="font-weight: bold; font-size: 20px; color: var(--accent-color); margin-bottom: 20px;">MENU</div>
         <div id="page-list"></div>
-        <div class="sidebar-item" onclick="addNewPage()" style="color: var(--accent-color); font-weight: bold;">＋ ページを追加</div>
-        <div style="font-size: 10px; color: var(--text-sub); margin-top: 40px; text-transform: uppercase;">Settings</div>
-        <div class="setting-input-group"><label>パラメータ①名</label><input type="text" id="set-p1" oninput="updateParamNames()"></div>
-        <div class="setting-input-group"><label>パラメータ②名</label><input type="text" id="set-p2" oninput="updateParamNames()"></div>
-        <div class="setting-input-group"><label>パラメータ③名</label><input type="text" id="set-p3" oninput="updateParamNames()"></div>
-        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 40px; opacity: 0.5;">閉じる</div>
+        <div class="sidebar-item" onclick="addNewPage()" style="color: var(--accent-color);">＋ ページを追加</div>
+        <div style="margin-top: 30px; font-size: 12px; color: var(--text-sub);">Settings</div>
+        <div class="setting-input-group"><label>P1名</label><input type="text" id="set-p1" oninput="updateParamNames()"></div>
+        <div class="setting-input-group"><label>P2名</label><input type="text" id="set-p2" oninput="updateParamNames()"></div>
+        <div class="setting-input-group"><label>P3名</label><input type="text" id="set-p3" oninput="updateParamNames()"></div>
+        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 30px; text-align: center; opacity: 0.5;">閉じる</div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="nav-bar">
-        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+        <div onclick="toggleMenu()" style="font-size:24px; padding:10px;">☰</div>
         <input type="text" class="page-title-input" id="pageTitle" oninput="saveCurrentState()">
-        <div style="width:30px;"></div>
+        <div style="width:40px;"></div>
     </div>
 
     <div class="fixed-header">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
-            <div id="placeholder" style="color: #444; text-align:center;">📷<br><span style="font-size:10px;">UPLOAD</span></div>
+            <div id="placeholder" style="color:#444;">📷 UPLOAD</div>
             <img id="preview" style="display:none;">
             <input type="file" id="fileInput" accept="image/*">
         </div>
         <div class="param-area">
             <div class="param-group">
                 <div class="param-label id-p1"></div>
-                <div class="control-row">
+                <div style="display:flex; align-items:center;">
                     <button class="btn-ctrl" onclick="changeVal('p1', -1)">◀</button>
                     <div class="indicator-container" id="ind-p1"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
                     <button class="btn-ctrl" onclick="changeVal('p1', 1)">▶</button>
@@ -165,7 +138,7 @@
             </div>
             <div class="param-group">
                 <div class="param-label id-p2"></div>
-                <div class="control-row">
+                <div style="display:flex; align-items:center;">
                     <button class="btn-ctrl" onclick="changeVal('p2', -1)">◀</button>
                     <div class="indicator-container" id="ind-p2"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
                     <button class="btn-ctrl" onclick="changeVal('p2', 1)">▶</button>
@@ -173,7 +146,7 @@
             </div>
             <div class="param-group">
                 <div class="param-label id-p3"></div>
-                <div class="control-row">
+                <div style="display:flex; align-items:center;">
                     <button class="btn-ctrl" onclick="changeVal('p3', -1)">◀</button>
                     <div class="indicator-container" id="ind-p3"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
                     <button class="btn-ctrl" onclick="changeVal('p3', 1)">▶</button>
@@ -183,35 +156,43 @@
     </div>
 
     <div class="scroll-content">
-        <div class="memo-label">MEMO</div>
+        <div style="font-size:12px; color:var(--accent-color); margin-bottom:10px;">MEMO</div>
         <textarea class="memo-textarea" id="memoField" oninput="saveCurrentState()" placeholder="メモを入力..."></textarea>
     </div>
 </div>
 
 <script>
-    // --- ダブルタップズーム防止のJavaScript ---
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-        let now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault(); // 300ミリ秒以内の連続タップを無効化
-        }
-        lastTouchEnd = now;
-    }, false);
+    let appData = { currentIndex: 0, paramNames: ["近さ", "固さ", "見た目"], pages: [{ title: "ページ①", img: null, p1: 1, p2: 1, p3: 1, memo: "" }] };
 
-    // --- 以下、既存のロジック ---
-    let appData = {
-        currentIndex: 0,
-        paramNames: ["近さ", "固さ", "見た目"],
-        pages: [{ title: "ページ①", img: null, p1: 1, p2: 1, p3: 1, memo: "" }]
-    };
-
+    // 保存（GitHub Pages/localStorage対策）
     function saveToStorage() {
-        try { localStorage.setItem('myAppData_v3', JSON.stringify(appData)); } catch (e) {}
+        try { localStorage.setItem('myAppData_vFinal', JSON.stringify(appData)); } catch (e) { alert("保存容量がいっぱいです。画像を消すか別のページを削除してください。"); }
     }
 
+    // 画像のリサイズ処理（これ重要！）
+    function resizeImage(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 600; // 横幅を600pxに制限して軽量化
+                let width = img.width;
+                let height = img.height;
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                callback(canvas.toDataURL('image/jpeg', 0.7)); // JPEG形式で圧縮して保存
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 以下、基本ロジック
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_v3');
+        const saved = localStorage.getItem('myAppData_vFinal');
         if (saved) { appData = JSON.parse(saved); }
         document.getElementById('set-p1').value = appData.paramNames[0];
         document.getElementById('set-p2').value = appData.paramNames[1];
@@ -244,8 +225,7 @@
         const next = appData.pages[appData.currentIndex][key] + diff;
         if (next >= 1 && next <= 5) {
             appData.pages[appData.currentIndex][key] = next;
-            updateUI();
-            saveToStorage();
+            updateUI(); saveToStorage();
         }
     }
 
@@ -259,23 +239,18 @@
         appData.paramNames[0] = document.getElementById('set-p1').value;
         appData.paramNames[1] = document.getElementById('set-p2').value;
         appData.paramNames[2] = document.getElementById('set-p3').value;
-        updateUI();
-        saveToStorage();
+        updateUI(); saveToStorage();
     }
 
     function addNewPage() {
         appData.pages.push({ title: `ページ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1, memo: "" });
         appData.currentIndex = appData.pages.length - 1;
-        updateUI();
-        saveToStorage();
-        toggleMenu();
+        updateUI(); saveToStorage(); toggleMenu();
     }
 
     function switchPage(idx) {
         appData.currentIndex = idx;
-        updateUI();
-        saveToStorage();
-        toggleMenu();
+        updateUI(); toggleMenu();
     }
 
     function renderPageList() {
@@ -291,19 +266,21 @@
     }
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                appData.pages[appData.currentIndex].img = ev.target.result;
-                updateUI();
-                saveToStorage();
-            };
-            reader.readAsDataURL(file);
+        if (e.target.files[0]) {
+            resizeImage(e.target.files[0], function(base64Data) {
+                appData.pages[appData.currentIndex].img = base64Data;
+                updateUI(); saveToStorage();
+            });
         }
     });
 
+    // 起動時にロード
     window.onload = loadFromStorage;
+
+    // 入力後のズレ防止：フォーカスが外れたらスクロール位置をリセット
+    document.addEventListener('focusout', function() {
+        window.scrollTo(0, 0);
+    });
 </script>
 
 </body>
