@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Stylish App - Tag Function</title>
+    <title>Stylish App - Double Tags</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -44,12 +44,11 @@
             z-index: 10;
         }
         .menu-btn { font-size: 24px; cursor: pointer; padding: 10px; color: var(--text-main); }
-
         .page-nav { flex: 1; display: flex; align-items: center; justify-content: center; }
         .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 20px; padding: 10px; cursor: pointer; }
         .page-title-input { width: 110px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 固定上部（画像・パラメータ） */
+        /* 固定上部 */
         .fixed-header {
             display: flex; height: 260px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
         }
@@ -65,18 +64,32 @@
             padding: 15px 5px; background-color: var(--card-bg); align-items: center;
         }
 
-        /* タグボタン */
-        .tag-btn {
+        /* タグ並列コンテナ */
+        .tag-row {
+            display: flex;
+            gap: 4px;
+            width: 95%;
             margin-bottom: 15px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+        }
+
+        /* タグボタン（上下中央揃え修正） */
+        .tag-btn {
+            flex: 1;
+            height: 32px; /* 高さを固定 */
+            padding: 0 4px;
+            border-radius: 10px;
+            font-size: 11px;
             font-weight: bold;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 80%;
-            text-align: center;
+            
+            /* 上下左右中央揃えの決定版 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* 行間の干渉を防ぐ */
+            
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -84,12 +97,11 @@
         .tag-btn.active {
             background-color: var(--accent-color);
             color: #000;
-            box-shadow: 0 0 15px var(--accent-color);
+            box-shadow: 0 0 12px var(--accent-color);
         }
         .tag-btn.inactive {
             background-color: #2a2a2a;
             color: #666;
-            box-shadow: none;
         }
 
         .param-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; width: 100%; }
@@ -108,10 +120,10 @@
         .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease; box-shadow: 10px 0 30px rgba(0,0,0,0.8); padding: 40px 20px; overflow-y: auto; }
         .sidebar.open { left: 0; }
         .sidebar-header { font-size: 20px; font-weight: bold; color: var(--accent-color); margin-bottom: 20px; }
-        .sidebar-item { padding: 15px 0; border-bottom: 1px solid #333; color: #fff; font-size: 16px; cursor: pointer; }
-        .setting-input-group { margin-top: 20px; }
-        .setting-input-group label { font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 5px; }
-        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 16px; border-radius: 5px; margin-bottom: 10px; }
+        .sidebar-item { padding: 12px 0; border-bottom: 1px solid #333; color: #fff; font-size: 15px; cursor: pointer; }
+        .setting-input-group { margin-top: 15px; }
+        .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 3px; }
+        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; font-size: 16px; border-radius: 5px; margin-bottom: 8px; }
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 90; }
         .overlay.show { display: block; }
@@ -127,7 +139,8 @@
         <div class="sidebar-item" onclick="addNewPage()" style="color: var(--accent-color);">＋ ページを追加</div>
         
         <div class="setting-input-group">
-            <label>タグの表示名</label><input type="text" id="set-tag-name" oninput="updateSettings()">
+            <label>タグ①表示名</label><input type="text" id="set-tag-name1" oninput="updateSettings()">
+            <label>タグ②表示名</label><input type="text" id="set-tag-name2" oninput="updateSettings()">
             <label>パラメータ①</label><input type="text" id="set-p1" oninput="updateSettings()">
             <label>パラメータ②</label><input type="text" id="set-p2" oninput="updateSettings()">
             <label>パラメータ③</label><input type="text" id="set-p3" oninput="updateSettings()">
@@ -154,8 +167,11 @@
             <input type="file" id="fileInput" accept="image/*">
         </div>
         <div class="param-area">
-            <!-- 新設：タグボタン -->
-            <button class="tag-btn" id="tagButton" onclick="toggleTag()"></button>
+            <!-- タグボタン並列 -->
+            <div class="tag-row">
+                <button class="tag-btn" id="tagButton1" onclick="toggleTag(1)"></button>
+                <button class="tag-btn" id="tagButton2" onclick="toggleTag(2)"></button>
+            </div>
 
             <div class="param-group">
                 <div class="param-label id-p1"></div>
@@ -195,14 +211,17 @@
     // --- 初期データ構造 ---
     let appData = { 
         currentIndex: 0, 
-        tagName: "タグ", // グローバル設定
+        tagName1: "タグ1", 
+        tagName2: "タグ2", 
         paramNames: ["近さ", "固さ", "見た目"], 
-        pages: [{ title: "ページ①", img: null, p1: 1, p2: 1, p3: 1, memo: "", tagActive: false }] 
+        pages: [{ title: "ページ①", img: null, p1: 1, p2: 1, p3: 1, memo: "", tagActive1: false, tagActive2: false }] 
     };
 
     // --- タグ切り替え ---
-    function toggleTag() {
-        appData.pages[appData.currentIndex].tagActive = !appData.pages[appData.currentIndex].tagActive;
+    function toggleTag(num) {
+        const p = appData.pages[appData.currentIndex];
+        if (num === 1) p.tagActive1 = !p.tagActive1;
+        if (num === 2) p.tagActive2 = !p.tagActive2;
         updateUI();
         saveToStorage();
     }
@@ -213,12 +232,13 @@
 
     // --- 保存 & 読み込み ---
     function saveToStorage() {
-        try { localStorage.setItem('myAppData_vTagFixed', JSON.stringify(appData)); } catch (e) { console.error("Save failed", e); }
+        try { localStorage.setItem('myAppData_vDoubleTag', JSON.stringify(appData)); } catch (e) { console.error("Save failed", e); }
     }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vTagFixed');
+        const saved = localStorage.getItem('myAppData_vDoubleTag');
         if (saved) { appData = JSON.parse(saved); }
-        document.getElementById('set-tag-name').value = appData.tagName;
+        document.getElementById('set-tag-name1').value = appData.tagName1 || "タグ1";
+        document.getElementById('set-tag-name2').value = appData.tagName2 || "タグ2";
         document.getElementById('set-p1').value = appData.paramNames[0];
         document.getElementById('set-p2').value = appData.paramNames[1];
         document.getElementById('set-p3').value = appData.paramNames[2];
@@ -231,16 +251,15 @@
         document.getElementById('pageTitle').value = p.title;
         document.getElementById('memoField').value = p.memo;
         
-        // タグボタン更新
-        const tagBtn = document.getElementById('tagButton');
-        tagBtn.innerText = appData.tagName;
-        if (p.tagActive) {
-            tagBtn.classList.remove('inactive');
-            tagBtn.classList.add('active');
-        } else {
-            tagBtn.classList.remove('active');
-            tagBtn.classList.add('inactive');
-        }
+        // タグボタン1
+        const btn1 = document.getElementById('tagButton1');
+        btn1.innerText = appData.tagName1;
+        btn1.className = p.tagActive1 ? 'tag-btn active' : 'tag-btn inactive';
+
+        // タグボタン2
+        const btn2 = document.getElementById('tagButton2');
+        btn2.innerText = appData.tagName2;
+        btn2.className = p.tagActive2 ? 'tag-btn active' : 'tag-btn inactive';
 
         // パラメータ更新
         ['p1', 'p2', 'p3'].forEach((key, idx) => {
@@ -262,7 +281,8 @@
     }
 
     function updateSettings() {
-        appData.tagName = document.getElementById('set-tag-name').value;
+        appData.tagName1 = document.getElementById('set-tag-name1').value;
+        appData.tagName2 = document.getElementById('set-tag-name2').value;
         appData.paramNames[0] = document.getElementById('set-p1').value;
         appData.paramNames[1] = document.getElementById('set-p2').value;
         appData.paramNames[2] = document.getElementById('set-p3').value;
@@ -270,22 +290,18 @@
         saveToStorage();
     }
 
-    // --- その他機能 ---
+    // --- その他共通機能 ---
     function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); renderPageList(); }
-    
     function changeVal(key, diff) {
         const next = appData.pages[appData.currentIndex][key] + diff;
         if (next >= 1 && next <= 5) { appData.pages[appData.currentIndex][key] = next; updateUI(); saveToStorage(); }
     }
-
     function addNewPage() {
-        appData.pages.push({ title: `ページ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1, memo: "", tagActive: false });
+        appData.pages.push({ title: `ページ${appData.pages.length + 1}`, img: null, p1: 1, p2: 1, p3: 1, memo: "", tagActive1: false, tagActive2: false });
         appData.currentIndex = appData.pages.length - 1;
         updateUI(); saveToStorage(); toggleMenu();
     }
-
     function switchPage(idx) { appData.currentIndex = idx; updateUI(); toggleMenu(); }
-
     function renderPageList() {
         const list = document.getElementById('page-list');
         list.innerHTML = '';
@@ -316,13 +332,9 @@
         };
         reader.readAsDataURL(file);
     }
-
     document.getElementById('fileInput').addEventListener('change', function(e) {
         if (e.target.files[0]) {
-            resizeImage(e.target.files[0], (data) => {
-                appData.pages[appData.currentIndex].img = data;
-                updateUI(); saveToStorage();
-            });
+            resizeImage(e.target.files[0], (data) => { appData.pages[appData.currentIndex].img = data; updateUI(); saveToStorage(); });
         }
     });
 
