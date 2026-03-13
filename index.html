@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fixed Swipe Range & Settings App</title>
+    <title>iPhone 13 Pro Stabilized App</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -39,20 +39,20 @@
         /* ナビバー */
         .nav-bar {
             height: 50px; display: flex; align-items: center; padding: 0 10px;
-            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0; z-index: 20;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0; z-index: 30;
         }
         .page-nav { flex: 1; display: flex; align-items: center; justify-content: center; }
         .nav-arrow { background: none; border: none; color: var(--accent-color); font-size: 24px; padding: 5px 15px; cursor: pointer; }
         .page-title-input { width: 120px; background: transparent; border: none; color: var(--text-main); text-align: center; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 固定ヘッダー（境界線を少し下げて220pxに） */
+        /* 固定ヘッダー (境界線を下げて220px) */
         .fixed-header {
             display: flex; height: 220px; flex-shrink: 0; border-bottom: 1px solid var(--border-color);
-            transition: all 0.25s ease-out; overflow: hidden;
+            transition: all 0.2s ease-in-out; overflow: hidden;
         }
         .phone-container.typing-mode .fixed-header { height: 0; border-bottom: none; opacity: 0; }
 
-        .image-area { width: 62%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); position: relative; }
+        .image-area { width: 62%; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--border-color); cursor: pointer; }
         .image-area img { width: 100%; height: 100%; object-fit: cover; }
         .param-area { width: 38%; display: flex; flex-direction: column; justify-content: center; padding: 5px; background-color: var(--card-bg); align-items: center; }
 
@@ -68,40 +68,38 @@
         .bar { width: 5px; height: 16px; background-color: var(--bar-inactive); border-radius: 1px; }
         .bar.active { background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
 
-        /* メモスワイプエリア */
+        /* スワイプメモエリア */
         .memo-swipe-outer { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .memo-dots { height: 20px; display: flex; justify-content: center; align-items: center; gap: 5px; pointer-events: none; }
+        .memo-dots { height: 20px; display: flex; justify-content: center; align-items: center; gap: 5px; }
         .phone-container.typing-mode .memo-dots { display: none; }
         .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; transition: 0.3s; }
         .dot.active { background: var(--accent-color); transform: scale(1.4); }
 
-        /* スワイプ感知を枠だけに限定するためのコンテナ構成 */
         .memo-swipe-container { 
-            flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; 
-            -webkit-overflow-scrolling: touch;
+            flex: 1; display: flex; overflow-x: auto; 
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
         }
         .memo-swipe-container::-webkit-scrollbar { display: none; }
 
         .memo-card-wrapper { 
             flex: 0 0 100%; width: 100%; height: 100%; 
             scroll-snap-align: start; 
-            padding: 5px 15px 15px 15px; 
-            display: flex; flex-direction: column;
-            pointer-events: none; /* 外側の余白はスワイプを邪魔しない */
+            padding: 10px 15px;
+            display: flex; justify-content: center; align-items: flex-start;
         }
         
-        /* メモカード（ここだけ pointer-events: auto にしてスワイプを有効化） */
+        /* メモカード：サイズを完全に固定(340px) */
         .memo-frame {
-            pointer-events: auto;
-            flex: 0 0 320px; width: 100%;
+            height: 340px; width: 100%;
             background-color: rgba(255,255,255,0.03);
             border: 1.5px solid var(--border-color); border-radius: 16px;
             display: flex; flex-direction: column; padding: 15px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4); overflow: hidden;
-            transition: border-color 0.25s ease;
-            margin: auto 0;
+            transition: border-color 0.2s;
+            /* スワイプをテキストエリアが邪魔しないように調整 */
+            touch-action: pan-x; 
         }
-        .phone-container.typing-mode .memo-frame { border-color: var(--accent-color); margin: 0; flex: 1; }
+        .phone-container.typing-mode .memo-frame { border-color: var(--accent-color); }
 
         .card-title-input {
             background: transparent; border: none; color: var(--accent-color);
@@ -113,16 +111,16 @@
         .memo-textarea {
             width: 100%; height: 100%; background: transparent; border: none;
             color: #ddd; font-size: 16px; line-height: 1.6; resize: none; outline: none;
-            overflow: hidden;
+            overflow: hidden; touch-action: pan-x; /* テキストエリア上でも横スワイプを許可 */
         }
 
         /* サイドメニュー */
-        .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease; padding: 60px 20px 20px 20px; overflow-y: auto; }
+        .sidebar { position: absolute; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background-color: var(--sidebar-bg); z-index: 100; transition: left 0.3s ease; padding: 60px 20px; overflow-y: auto; }
         .sidebar.open { left: 0; }
         .sidebar-item { padding: 12px 0; border-bottom: 1px solid #333; color: #fff; font-size: 15px; cursor: pointer; }
-        .setting-input-group { margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
-        .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 4px; }
-        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 10px; font-size: 14px; border-radius: 8px; margin-bottom: 12px; outline: none; }
+        .setting-input-group { margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+        .setting-input-group label { font-size: 10px; color: var(--text-sub); display: block; margin-top: 10px; }
+        .setting-input-group input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; font-size: 14px; border-radius: 8px; margin-top: 4px; outline: none; }
 
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 90; }
         .overlay.show { display: block; }
@@ -132,27 +130,21 @@
 <body>
 
 <div class="phone-container" id="mainContainer">
-    <!-- サイドメニュー -->
     <div class="sidebar" id="sidebar">
         <div style="font-weight: bold; color: var(--accent-color); font-size: 18px; margin-bottom: 20px;">MENU</div>
         <div id="sidebar-page-list"></div>
         <div class="sidebar-item" onclick="addNewDataPage()" style="color: var(--accent-color);">＋ ページを追加</div>
-        
-        <!-- 復元した設定項目 -->
         <div class="setting-input-group">
-            <div style="font-size: 11px; color: var(--accent-color); margin-bottom: 10px; font-weight: bold;">SETTINGS</div>
             <label>タグ①名</label><input type="text" id="set-tag-name1" oninput="updateSettings()">
             <label>タグ②名</label><input type="text" id="set-tag-name2" oninput="updateSettings()">
-            <label>パラメータ①名</label><input type="text" id="set-p1" oninput="updateSettings()">
-            <label>パラメータ②名</label><input type="text" id="set-p2" oninput="updateSettings()">
-            <label>パラメータ③名</label><input type="text" id="set-p3" oninput="updateSettings()">
+            <label>P①名</label><input type="text" id="set-p1" oninput="updateSettings()">
+            <label>P②名</label><input type="text" id="set-p2" oninput="updateSettings()">
+            <label>P③名</label><input type="text" id="set-p3" oninput="updateSettings()">
         </div>
-        
-        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 20px; text-align: center; opacity: 0.5; font-size: 12px;">閉じる</div>
+        <div class="sidebar-item" onclick="toggleMenu()" style="margin-top: 20px; text-align: center; opacity: 0.5;">閉じる</div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    <!-- ヘッダー -->
     <div class="nav-bar">
         <div onclick="toggleMenu()" style="font-size:24px; padding:10px;">☰</div>
         <div class="page-nav">
@@ -163,7 +155,6 @@
         <div style="width:44px;"></div>
     </div>
 
-    <!-- 固定ヘッダー (220px) -->
     <div class="fixed-header" id="fixedHeader">
         <div class="image-area" onclick="document.getElementById('fileInput').click()">
             <div id="placeholder" style="color:#444; font-size: 10px;">📷 UPLOAD</div>
@@ -179,7 +170,6 @@
         </div>
     </div>
 
-    <!-- メモエリア -->
     <div class="memo-swipe-outer">
         <div class="memo-dots" id="memoDots"></div>
         <div class="memo-swipe-container" id="memoSwipeContainer"></div>
@@ -219,22 +209,26 @@
         renderAll(); toggleMenu(); saveToStorage();
     }
 
+    // スワイプ連動ロジック
     swipeContainer.addEventListener('scroll', () => {
-        const index = Math.round(swipeContainer.scrollLeft / swipeContainer.clientWidth);
         const p = appData.pages[appData.currentIndex];
+        const index = Math.round(swipeContainer.scrollLeft / swipeContainer.offsetWidth);
         
         if (index !== p.currentMemoIndex) {
             const oldIdx = p.currentMemoIndex || 0;
             p.currentMemoIndex = index;
             updateDots(index);
 
+            // 前のカードが空なら削除
             const oldMemo = p.memos[oldIdx];
             if (oldMemo && oldMemo.isNew && oldMemo.content.trim() === "" && oldMemo.title.includes("CARD")) {
                 p.memos.splice(oldIdx, 1);
                 p.currentMemoIndex = Math.min(index, p.memos.length - 1);
                 renderMemosOnly();
+                return;
             }
 
+            // 最後のカードなら新規作成
             if (index >= p.memos.length) {
                 p.memos.push({ title: `CARD ${p.memos.length + 1}`, content: "", isNew: true });
                 renderMemosOnly();
@@ -249,23 +243,15 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'memo-card-wrapper';
             wrapper.innerHTML = `
-                <div class="memo-frame">
-                    <input type="text" class="card-title-input" 
-                        value="${m.title}" 
-                        oninput="updateCardTitle(this, ${i})"
-                        onfocus="setTyping(true)"
-                        onblur="setTyping(false)">
-                    <textarea class="memo-textarea" 
-                        onfocus="setTyping(true)" 
-                        onblur="setTyping(false)" 
-                        oninput="updateMemoContent(this, ${i})"
-                        placeholder="Write here...">${m.content}</textarea>
+                <div class="memo-frame" id="frame-${i}">
+                    <input type="text" class="card-title-input" value="${m.title}" oninput="updateCardTitle(this, ${i})" onfocus="setTyping(true)" onblur="setTyping(false)">
+                    <textarea class="memo-textarea" onfocus="setTyping(true)" onblur="setTyping(false)" oninput="updateMemoContent(this, ${i})" placeholder="Write here...">${m.content}</textarea>
                 </div>
             `;
             swipeContainer.appendChild(wrapper);
         });
         updateDots(p.currentMemoIndex || 0);
-        swipeContainer.scrollLeft = (p.currentMemoIndex || 0) * swipeContainer.clientWidth;
+        swipeContainer.scrollLeft = (p.currentMemoIndex || 0) * swipeContainer.offsetWidth;
     }
 
     function updateDots(activeIdx) {
@@ -280,9 +266,8 @@
     }
 
     function updateCardTitle(el, idx) {
-        const p = appData.pages[appData.currentIndex];
-        p.memos[idx].title = el.value;
-        p.memos[idx].isNew = false;
+        appData.pages[appData.currentIndex].memos[idx].title = el.value;
+        appData.pages[appData.currentIndex].memos[idx].isNew = false;
         saveToStorage();
     }
 
@@ -291,9 +276,8 @@
             el.value = appData.pages[appData.currentIndex].memos[memoIdx].content;
             return;
         }
-        const p = appData.pages[appData.currentIndex];
-        p.memos[memoIdx].content = el.value;
-        p.memos[memoIdx].isNew = false;
+        appData.pages[appData.currentIndex].memos[memoIdx].content = el.value;
+        appData.pages[appData.currentIndex].memos[memoIdx].isNew = false;
         saveToStorage();
     }
 
@@ -336,8 +320,13 @@
     }
 
     function setTyping(isTyping) {
-        if (isTyping) mainContainer.classList.add('typing-mode');
-        else { mainContainer.classList.remove('typing-mode'); window.scrollTo(0,0); }
+        if (isTyping) {
+            mainContainer.classList.add('typing-mode');
+            window.scrollTo(0,0);
+        } else {
+            mainContainer.classList.remove('typing-mode');
+            window.scrollTo(0,0);
+        }
     }
 
     function changeVal(key, diff) {
@@ -367,9 +356,9 @@
         renderAll(); saveToStorage();
     }
 
-    function saveToStorage() { localStorage.setItem('myAppData_vSwipeFixedSettings', JSON.stringify(appData)); }
+    function saveToStorage() { localStorage.setItem('myAppData_vSwipeStable', JSON.stringify(appData)); }
     function loadFromStorage() {
-        const saved = localStorage.getItem('myAppData_vSwipeFixedSettings');
+        const saved = localStorage.getItem('myAppData_vSwipeStable');
         if (saved) { appData = JSON.parse(saved); }
         renderAll();
     }
@@ -413,6 +402,13 @@
             });
         }
     });
+
+    // キーボードによる高さズレを徹底防止
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            window.scrollTo(0, 0);
+        });
+    }
 
     window.onload = loadFromStorage;
 </script>
